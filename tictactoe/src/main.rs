@@ -83,7 +83,7 @@ fn read_position() -> u8 {
 
     println!("You select: {}\n", input);
     if input > 9 || input < 1 {
-        println!("Pick a number between 1 and 9");
+        println!("The number have to be between 1 and 9");
         return read_position();
     }
     input

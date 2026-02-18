@@ -8,6 +8,7 @@
 - ANSI color codes for terminal output
 
 # What could be improved or made different:
+
 ## Improve:
 - Make a turn system, that way I don't have to hard code Turn X and O
 
