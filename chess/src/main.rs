@@ -150,29 +150,6 @@ fn white_bishop_movement(
     board: &[[char; 8]; 8],
     possible_movements: &mut [[usize; 8]; 8],
 ) {
-    let (col, row) = position;
-    let directions: [(i32, i32); 4] = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
-
-    for (dc, dr) in directions {
-        let mut c = col as i32 + dc;
-        let mut r = row as i32 + dr;
-
-        while c >= 0 && c < 8 && r >= 0 && r < 8 {
-            let target = board[r as usize][c as usize];
-
-            if target == ' ' {
-                possible_movements[r as usize][c as usize] = 1;
-            } else if BLACK_PIECES.contains(&target) {
-                possible_movements[r as usize][c as usize] = 1;
-                break;
-            } else {
-                break;
-            }
-
-            c += dc;
-            r += dr;
-        }
-    }
 }
 
 fn black_bishop_movement(
@@ -181,28 +158,6 @@ fn black_bishop_movement(
     possible_movements: &mut [[usize; 8]; 8],
 ) {
     let (col, row) = position;
-    let directions: [(i32, i32); 4] = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
-
-    for (dc, dr) in directions {
-        let mut c = col as i32 + dc;
-        let mut r = row as i32 + dr;
-
-        while c >= 0 && c < 8 && r >= 0 && r < 8 {
-            let target = board[r as usize][c as usize];
-
-            if target == ' ' {
-                possible_movements[r as usize][c as usize] = 1;
-            } else if WHITE_PIECES.contains(&target) {
-                possible_movements[r as usize][c as usize] = 1;
-                break;
-            } else {
-                break;
-            }
-
-            c += dc;
-            r += dr;
-        }
-    }
 }
 
 fn white_knight_movement(
@@ -210,32 +165,6 @@ fn white_knight_movement(
     board: &[[char; 8]; 8],
     possible_movements: &mut [[usize; 8]; 8],
 ) {
-    let (col, row) = position;
-    let moves: [(i32, i32); 8] = [
-        (-2, -1),
-        (-2, 1),
-        (2, -1),
-        (2, 1),
-        (-1, -2),
-        (-1, 2),
-        (1, -2),
-        (1, 2),
-    ];
-
-    for (dc, dr) in moves {
-        let c = col as i32 + dc;
-        let r = row as i32 + dr;
-
-        if c >= 0 && c < 8 && r >= 0 && r < 8 {
-            let target = board[r as usize][c as usize];
-
-            if target == ' ' {
-                possible_movements[r as usize][c as usize] = 1;
-            } else if BLACK_PIECES.contains(&target) {
-                possible_movements[r as usize][c as usize] = 1;
-            }
-        }
-    }
 }
 
 fn black_knight_movement(
@@ -244,31 +173,6 @@ fn black_knight_movement(
     possible_movements: &mut [[usize; 8]; 8],
 ) {
     let (col, row) = position;
-    let moves: [(i32, i32); 8] = [
-        (-2, -1),
-        (-2, 1),
-        (2, -1),
-        (2, 1),
-        (-1, -2),
-        (-1, 2),
-        (1, -2),
-        (1, 2),
-    ];
-
-    for (dc, dr) in moves {
-        let c = col as i32 + dc;
-        let r = row as i32 + dr;
-
-        if c >= 0 && c < 8 && r >= 0 && r < 8 {
-            let target = board[r as usize][c as usize];
-
-            if target == ' ' {
-                possible_movements[r as usize][c as usize] = 1;
-            } else if WHITE_PIECES.contains(&target) {
-                possible_movements[r as usize][c as usize] = 1;
-            }
-        }
-    }
 }
 
 fn white_rook_movement(
@@ -277,26 +181,54 @@ fn white_rook_movement(
     possible_movements: &mut [[usize; 8]; 8],
 ) {
     let (col, row) = position;
-    let directions: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
-
-    for (dc, dr) in directions {
-        let mut c = col as i32 + dc;
-        let mut r = row as i32 + dr;
-
-        while c >= 0 && c < 8 && r >= 0 && r < 8 {
-            let target = board[r as usize][c as usize];
-
-            if target == ' ' {
-                possible_movements[r as usize][c as usize] = 1;
-            } else if BLACK_PIECES.contains(&target) {
-                possible_movements[r as usize][c as usize] = 1;
-                break;
-            } else {
-                break;
-            }
-
-            c += dc;
-            r += dr;
+    // la torre esta en board row col, tengo que hace 4 for desde position hasta
+    // limite del tablero o ficha
+    for iter_col in col + 1..=7 {
+        let target = board[row][iter_col];
+        if target == ' ' {
+            possible_movements[row][iter_col] = 1;
+        } else if WHITE_PIECES.contains(&target) {
+            break;
+        } else {
+            possible_movements[row][iter_col] = 1;
+            // Check if next piece is Black King
+            break;
+        }
+    }
+    for iter_col in col - 1..=0 {
+        let target = board[row][iter_col];
+        if target == ' ' {
+            possible_movements[row][iter_col] = 1;
+        } else if WHITE_PIECES.contains(&target) {
+            break;
+        } else {
+            possible_movements[row][iter_col] = 1;
+            // Check if next piece is Black King
+            break;
+        }
+    }
+    for iter_row in row + 1..=7 {
+        let target = board[iter_row][col];
+        if target == ' ' {
+            possible_movements[iter_row][col] = 1;
+        } else if WHITE_PIECES.contains(&target) {
+            break;
+        } else {
+            possible_movements[iter_row][col] = 1;
+            // Check if next piece is Black King
+            break;
+        }
+    }
+    for iter_row in row + 1..=7 {
+        let target = board[iter_row][col];
+        if target == ' ' {
+            possible_movements[iter_row][col] = 1;
+        } else if WHITE_PIECES.contains(&target) {
+            break;
+        } else {
+            possible_movements[iter_row][col] = 1;
+            // Check if next piece is Black King
+            break;
         }
     }
 }
