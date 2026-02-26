@@ -38,6 +38,16 @@ fn main() {
         [0, 0, 0, 0, 0, 0, 0, 0], // a7-h7
         [0, 0, 0, 0, 0, 0, 0, 0], // a8-h8
     ];
+    let mut black_pieces_pined: [[bool; 8]; 8] = [
+        [false, false, false, false, false, false, false, false], // a1-h1
+        [false, false, false, false, false, false, false, false], // a2-h2
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false],
+        [false, false, false, false, false, false, false, false], // a7-h7
+        [false, false, false, false, false, false, false, false], // a8-h8
+    ];
     // loop {}
 }
 
@@ -175,90 +185,105 @@ fn black_knight_movement(
     let (col, row) = position;
 }
 
-fn white_rook_movement(
+fn rook_movement(
     position: (usize, usize),
     board: &[[char; 8]; 8],
+    self_pieces: &[char; 6],
+    enemy_pieces: &[char; 6],
     possible_movements: &mut [[usize; 8]; 8],
+    enemy_pieces_pinned: &mut [[bool; 8]; 8],
 ) {
     let (col, row) = position;
-    // la torre esta en board row col, tengo que hace 4 for desde position hasta
-    // limite del tablero o ficha
-    for iter_col in col + 1..=7 {
+
+    for iter_col in col..7 {
         let target = board[row][iter_col];
         if target == ' ' {
             possible_movements[row][iter_col] = 1;
-        } else if WHITE_PIECES.contains(&target) {
+        } else if self_pieces.contains(&target) {
             break;
         } else {
             possible_movements[row][iter_col] = 1;
-            // Check if next piece is Black King
-            break;
-        }
-    }
-    for iter_col in col - 1..=0 {
-        let target = board[row][iter_col];
-        if target == ' ' {
-            possible_movements[row][iter_col] = 1;
-        } else if WHITE_PIECES.contains(&target) {
-            break;
-        } else {
-            possible_movements[row][iter_col] = 1;
-            // Check if next piece is Black King
-            break;
-        }
-    }
-    for iter_row in row + 1..=7 {
-        let target = board[iter_row][col];
-        if target == ' ' {
-            possible_movements[iter_row][col] = 1;
-        } else if WHITE_PIECES.contains(&target) {
-            break;
-        } else {
-            possible_movements[iter_row][col] = 1;
-            // Check if next piece is Black King
-            break;
-        }
-    }
-    for iter_row in row + 1..=7 {
-        let target = board[iter_row][col];
-        if target == ' ' {
-            possible_movements[iter_row][col] = 1;
-        } else if WHITE_PIECES.contains(&target) {
-            break;
-        } else {
-            possible_movements[iter_row][col] = 1;
-            // Check if next piece is Black King
-            break;
-        }
-    }
-}
-
-fn black_rook_movement(
-    position: (usize, usize),
-    board: &[[char; 8]; 8],
-    possible_movements: &mut [[usize; 8]; 8],
-) {
-    let (col, row) = position;
-    let directions: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
-
-    for (dc, dr) in directions {
-        let mut c = col as i32 + dc;
-        let mut r = row as i32 + dr;
-
-        while c >= 0 && c < 8 && r >= 0 && r < 8 {
-            let target = board[r as usize][c as usize];
-
-            if target == ' ' {
-                possible_movements[r as usize][c as usize] = 1;
-            } else if WHITE_PIECES.contains(&target) {
-                possible_movements[r as usize][c as usize] = 1;
-                break;
-            } else {
-                break;
+            //Check for pins: if next piece is Black King
+            for jter_col in iter_col..7 {
+                let target_ = board[row][jter_col];
+                if target_ == ' ' {
+                    continue;
+                } else if target_ == enemy_pieces[0] {
+                    enemy_pieces_pinned[row][jter_col] = true;
+                } else {
+                    break;
+                }
             }
+            break;
+        }
+    }
+    //Para los ciclos de col a 0 seria: for i in (0..col).rev() {aja}
+    for iter_col in (0..col).rev() {
+        let target = board[row][iter_col];
+        if target == ' ' {
+            possible_movements[row][iter_col] = 1;
+        } else if self_pieces.contains(&target) {
+            break;
+        } else {
+            possible_movements[row][iter_col] = 1;
+            //Check for pins: if next piece is Black King
+            for jter_col in (0..iter_col).rev() {
+                let target_ = board[row][jter_col];
+                if target_ == ' ' {
+                    continue;
+                } else if target_ == enemy_pieces[0] {
+                    enemy_pieces_pinned[row][jter_col] = true;
+                } else {
+                    break;
+                }
+            }
+            break;
+        }
+    }
 
-            c += dc;
-            r += dr;
+    for iter_row in row..7 {
+        let target = board[iter_row][col];
+        if target == ' ' {
+            possible_movements[iter_row][col] = 1;
+        } else if self_pieces.contains(&target) {
+            break;
+        } else {
+            possible_movements[iter_row][col] = 1;
+            //Check for pins: if next piece is Black King
+            for jter_row in iter_row..7 {
+                let target_ = board[jter_row][col];
+                if target_ == ' ' {
+                    continue;
+                } else if target_ == enemy_pieces[0] {
+                    enemy_pieces_pinned[jter_row][col] = true;
+                } else {
+                    break;
+                }
+            }
+            break;
+        }
+    }
+
+    for iter_row in (0..row).rev() {
+        let target = board[iter_row][col];
+        if target == ' ' {
+            possible_movements[iter_row][col] = 1;
+        } else if self_pieces.contains(&target) {
+            break;
+        } else {
+            possible_movements[iter_row][col] = 1;
+            //Check for pins: if next piece is Black King
+            for jter_row in (0..iter_row).rev() {
+                let target_ = board[jter_row][col];
+                if target_ == ' ' {
+                    continue;
+                } else if target_ == enemy_pieces[0] {
+                    enemy_pieces_pinned[jter_row][col] = true;
+                } else {
+                    break;
+                }
+            }
+            break;
         }
     }
 }
