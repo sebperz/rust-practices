@@ -2,7 +2,11 @@ use std::io;
 
 const WHITE_PIECES: [char; 6] = ['♔', '♕', '♖', '♗', '♘', '♙'];
 const BLACK_PIECES: [char; 6] = ['♚', '♛', '♜', '♝', '♞', '♟'];
-
+const WHITE_BG: &str = "\x1B[48;2;146;131;116m"; // Bright white background
+const BLACK_BG: &str = "\x1B[48;2;60;56;54m"; // Chess.com green (dark green)
+const WHITE_PIECE_COLOR: &str = "\x1B[38;5;231m"; // White pieces (bright)
+const BLACK_PIECE_COLOR: &str = "\x1B[38;5;16m"; // Black pieces (dark)
+const RESET: &str = "\x1B[0m";
 fn main() {
     let mut board: [[char; 8]; 8] = [
         ['♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖'], // a1-h1
@@ -57,8 +61,50 @@ fn main() {
     ];
 
     print_board_pieces(&board);
+    print_chess_board(board);
 
     // loop {}
+}
+
+fn print_chess_board(board: [[char; 8]; 8]) {
+    // ANSI escape codes for background colors (48 = background, 38 = foreground)
+
+    // Unicode chess pieces are black by default, white pieces need to be distinguished
+    // Black pieces: ♜♞♝♛♚♟ (filled)
+    // White pieces: ♖♘♗♕♔♙ (outline style in Unicode, but render differently per font)
+
+    println!("   a  b  c  d  e  f  g  h");
+
+    for row in (0..8).rev() {
+        print!("{} ", row + 1);
+
+        for col in 0..8 {
+            // Determine square color: (row + col) % 2 == 0 is traditionally a light square
+            let is_white_square = (row + col) % 2 == 0;
+            let bg = if is_white_square { WHITE_BG } else { BLACK_BG };
+
+            let piece = board[row][col];
+            let piece_str = if piece == ' ' {
+                "   ".to_string()
+            } else {
+                // Determine piece color based on piece character
+                let is_black_piece = BLACK_PIECES.contains(&piece);
+                let piece_color = if is_black_piece {
+                    BLACK_PIECE_COLOR
+                } else {
+                    WHITE_PIECE_COLOR
+                };
+                format!("{}{:^3}", piece_color, piece)
+            };
+
+            // Print: background color + piece color + piece + reset (but keep bg for space)
+            // Actually, we need to reset after the space to avoid bleeding
+            print!("{}{}{}", bg, piece_str, RESET);
+        }
+
+        println!(" {}", row + 1); // New line after each rank
+    }
+    println!("   a  b  c  d  e  f  g  h");
 }
 
 fn read_input() -> (char, char) {
@@ -106,14 +152,14 @@ fn read_input() -> (char, char) {
     (letter, number)
 }
 
-fn input_to_usize(position: (char, char)) -> (usize, usize) {
+fn position_char_to_usize(position: (char, char)) -> (usize, usize) {
     let (letter, number) = position;
     let col = letter as usize - 'a' as usize;
     let row = number as usize - '1' as usize;
     (col, row)
 }
 
-fn usize_to_input(position: (usize, usize)) -> (char, char) {
+fn position_usize_to_char(position: (usize, usize)) -> (char, char) {
     let (col, row) = position;
     let letter = (col as u8 + b'a') as char;
     let number = (row as u8 + b'1') as char;
@@ -125,7 +171,7 @@ fn print_board_pieces(board: &[[char; 8]; 8]) {
     for row in 0..8 {
         for col in 0..8 {
             let piece = board[row][col];
-            let (letter, number) = usize_to_input((col, row));
+            let (letter, number) = position_usize_to_char((col, row));
             match piece {
                 '♔' => println!("White King at {}{}", letter, number),
                 '♕' => println!("White Queen at {}{}", letter, number),
