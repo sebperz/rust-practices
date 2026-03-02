@@ -1,4 +1,4 @@
-use std::{io, iter::Enumerate};
+use std::io;
 
 const WHITE_PIECES: [char; 6] = ['♔', '♕', '♖', '♗', '♘', '♙'];
 const BLACK_PIECES: [char; 6] = ['♚', '♛', '♜', '♝', '♞', '♟'];
@@ -16,41 +16,13 @@ fn main() {
         [' ', ' ', ' ', '♖', ' ', ' ', ' ', ' '],
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
         [' ', ' ', ' ', '♜', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], // a7-h7
+        [' ', ' ', ' ', '♜', ' ', ' ', ' ', ' '], // a7-h7
         [' ', ' ', ' ', '♚', ' ', ' ', ' ', ' '], // a8-h8
     ];
-    let mut white_posible_movements: [[usize; 8]; 8] = [
-        [0, 0, 0, 0, 0, 0, 0, 0], // a1-h1
-        [0, 0, 0, 0, 0, 0, 0, 0], // a2-h2
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0], // a7-h7
-        [0, 0, 0, 0, 0, 0, 0, 0], // a8-h8
-    ];
-    let mut black_posible_movements: [[usize; 8]; 8] = [
-        [0, 0, 0, 0, 0, 0, 0, 0], // a1-h1
-        [0, 0, 0, 0, 0, 0, 0, 0], // a2-h2
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0], // a7-h7
-        [0, 0, 0, 0, 0, 0, 0, 0], // a8-h8
-    ];
+    let mut white_posible_movements: [[bool; 8]; 8] = [[false; 8]; 8];
+    let mut black_posible_movements: [[bool; 8]; 8] = [[false; 8]; 8];
+    let mut bool_board: [[bool; 8]; 8] = [[false; 8]; 8];
 
-    let mut white_pieces_pinned: [[bool; 8]; 8] = [[false; 8]; 8];
-    let mut black_pieces_pinned: [[bool; 8]; 8] = [
-        [false, false, false, false, false, false, false, false], // a1-h1
-        [false, false, false, false, false, false, false, false], // a2-h2
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false],
-        [false, false, false, false, false, false, false, false], // a7-h7
-        [false, false, false, false, false, false, false, false], // a8-h8
-    ];
     // print_board_pieces(&board);
     print_chess_board(board);
     rook_movement(
@@ -251,7 +223,7 @@ fn rook_movement(
     board: &[[char; 8]; 8],
     ally_pieces: &[char; 6],
     enemy_pieces: &[char; 6],
-    possible_movements: &mut [[usize; 8]; 8],
+    possible_movements: &mut [[bool; 8]; 8],
     enemy_piece_pinned: &mut [[bool; 8]; 8],
 ) {
     let (col, row) = position;
@@ -259,11 +231,11 @@ fn rook_movement(
     for iter_col in col + 1..=7 {
         let target = board[row][iter_col];
         if target == ' ' {
-            possible_movements[row][iter_col] = 1;
+            possible_movements[row][iter_col] = true;
         } else if ally_pieces.contains(&target) {
             break;
         } else {
-            possible_movements[row][iter_col] = 1;
+            possible_movements[row][iter_col] = true;
 
             //Check for pins: if next piece is Black King
             for jter_col in iter_col + 1..=7 {
@@ -282,11 +254,11 @@ fn rook_movement(
     for iter_col in (0..col).rev() {
         let target = board[row][iter_col];
         if target == ' ' {
-            possible_movements[row][iter_col] = 1;
+            possible_movements[row][iter_col] = true;
         } else if ally_pieces.contains(&target) {
             break;
         } else {
-            possible_movements[row][iter_col] = 1;
+            possible_movements[row][iter_col] = true;
             //Check for pins: if next piece is Black King
             for jter_col in (0..iter_col).rev() {
                 if board[row][jter_col] == enemy_pieces[0] {
@@ -304,11 +276,11 @@ fn rook_movement(
     for iter_row in row + 1..=7 {
         let target = board[iter_row][col];
         if target == ' ' {
-            possible_movements[iter_row][col] = 1;
+            possible_movements[iter_row][col] = true;
         } else if ally_pieces.contains(&target) {
             break;
         } else {
-            possible_movements[iter_row][col] = 1;
+            possible_movements[iter_row][col] = true;
             //Check for pins: if next piece is Black King
             for jter_row in iter_row + 1..=7 {
                 if board[jter_row][col] == enemy_pieces[0] {
@@ -328,11 +300,11 @@ fn rook_movement(
     for iter_row in (0..row).rev() {
         let target = board[iter_row][col];
         if target == ' ' {
-            possible_movements[iter_row][col] = 1;
+            possible_movements[iter_row][col] = true;
         } else if ally_pieces.contains(&target) {
             break;
         } else {
-            possible_movements[iter_row][col] = 1;
+            possible_movements[iter_row][col] = true;
             //Check for pins: if next piece is Black King
             for jter_row in (0..iter_row).rev() {
                 if board[jter_row][col] == enemy_pieces[0] {
@@ -349,7 +321,7 @@ fn rook_movement(
         }
     }
 }
-fn print_posible_movements(board: [[usize; 8]; 8]) {
+fn print_posible_movements(board: [[bool; 8]; 8]) {
     // ANSI escape codes for background colors (48 = background, 38 = foreground)
 
     // Unicode chess pieces are black by default, white pieces need to be distinguished
@@ -364,7 +336,7 @@ fn print_posible_movements(board: [[usize; 8]; 8]) {
         for col in 0..8 {
             // Determine square color: (row + col) % 2 == 0 is traditionally a light square
             let is_white_square = (row + col) % 2 == 0;
-            let bg = if board[row][col] == 1 {
+            let bg = if board[row][col] == true {
                 GREEN
             } else if is_white_square {
                 WHITE_BG
