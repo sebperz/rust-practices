@@ -21,7 +21,8 @@ fn main() {
     ];
     let mut white_posible_movements: [[bool; 8]; 8] = [[false; 8]; 8];
     let mut black_posible_movements: [[bool; 8]; 8] = [[false; 8]; 8];
-    let mut bool_board: [[bool; 8]; 8] = [[false; 8]; 8];
+    let mut white_pieces_pinned: [[bool; 8]; 8] = [[false; 8]; 8];
+    let mut black_pieces_pinned: [[bool; 8]; 8] = [[false; 8]; 8];
 
     // print_board_pieces(&board);
     print_chess_board(board);
@@ -168,6 +169,16 @@ fn pawn_movement(
         }
     }
 }
+fn king_movement(
+    position: (usize, usize),
+    board: &[[char; 8]; 8],
+    ally_pieces: &[char; 6],
+    enemy_pieces: &[char; 6],
+    possible_movements: &mut [[bool; 8]; 8],
+) {
+    //cant walk on posible movemente of enemy pieces
+    //toca rotar alrededor del rey
+}
 
 fn rook_movement(
     position: (usize, usize),
@@ -201,7 +212,6 @@ fn rook_movement(
             break;
         }
     }
-    //Para los ciclos de col a 0 seria: for i in (0..col).rev() {aja}
     for iter_col in (0..col).rev() {
         let target = board[row][iter_col];
         if target == ' ' {
@@ -210,6 +220,7 @@ fn rook_movement(
             break;
         } else {
             possible_movements[row][iter_col] = true;
+
             //Check for pins: if next piece is Black King
             for jter_col in (0..iter_col).rev() {
                 if board[row][jter_col] == enemy_pieces[0] {
@@ -232,6 +243,7 @@ fn rook_movement(
             break;
         } else {
             possible_movements[iter_row][col] = true;
+
             //Check for pins: if next piece is Black King
             for jter_row in iter_row + 1..=7 {
                 if board[jter_row][col] == enemy_pieces[0] {
@@ -256,6 +268,7 @@ fn rook_movement(
             break;
         } else {
             possible_movements[iter_row][col] = true;
+
             //Check for pins: if next piece is Black King
             for jter_row in (0..iter_row).rev() {
                 if board[jter_row][col] == enemy_pieces[0] {
