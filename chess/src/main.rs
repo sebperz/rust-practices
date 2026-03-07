@@ -10,14 +10,14 @@ const GREEN: &str = "\x1B[48;2;104;157;106m";
 const RESET: &str = "\x1B[0m";
 fn main() {
     let mut board: [[char; 8]; 8] = [
-        [' ', ' ', '♜', '♔', '♖', ' ', ' ', ' '], // a1-h1
+        [' ', ' ', '♜', '♘', '♖', ' ', ' ', ' '], // a1-h1
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], // a2-h2
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', '♔', '♗', '♔'],
+        [' ', ' ', ' ', ' ', ' ', '♘', '♗', '♘'],
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], // a7-h7
-        ['♔', ' ', ' ', ' ', ' ', ' ', ' ', ' '], // a8-h8
+        ['♘', ' ', ' ', ' ', ' ', ' ', ' ', ' '], // a8-h8
     ];
     let mut white_posible_movements: [[bool; 8]; 8] = [[false; 8]; 8];
     let mut black_posible_movements: [[bool; 8]; 8] = [[false; 8]; 8];
@@ -34,10 +34,34 @@ fn main() {
     //     &mut white_posible_movements,
     //     &mut black_pieces_pinned,
     // );
-    king_movement((3, 0), &board, &WHITE_PIECES, &mut white_posible_movements);
-    king_movement((5, 3), &board, &WHITE_PIECES, &mut white_posible_movements);
-    king_movement((7, 3), &board, &WHITE_PIECES, &mut white_posible_movements);
-    king_movement((0, 7), &board, &WHITE_PIECES, &mut white_posible_movements);
+    knight_movement(
+        (3, 0),
+        &board,
+        &WHITE_PIECES,
+        &BLACK_PIECES,
+        &mut white_posible_movements,
+    );
+    knight_movement(
+        (5, 3),
+        &board,
+        &WHITE_PIECES,
+        &BLACK_PIECES,
+        &mut white_posible_movements,
+    );
+    knight_movement(
+        (7, 3),
+        &board,
+        &WHITE_PIECES,
+        &BLACK_PIECES,
+        &mut white_posible_movements,
+    );
+    knight_movement(
+        (0, 7),
+        &board,
+        &WHITE_PIECES,
+        &BLACK_PIECES,
+        &mut white_posible_movements,
+    );
     println!("Posible movements:");
     print_posible_movements(white_posible_movements);
     println!("pings");
@@ -179,20 +203,9 @@ fn king_movement(
     ally_pieces: &[char; 6],
     possible_movements: &mut [[bool; 8]; 8],
 ) {
-    //cant walk on posible movemente of enemy pieces
-    //toca rotar alrededor del rey
-    // 012
-    // 3X4
-    // 567
-    // 0 -> row+1,col-1
-    // 1 -> row+1,col
-    // 2 -> row+1,col+1
-    // 3 -> row,col-1
-    // X -> row,col
-    // 4 -> row,col+1
-    // 5 -> row-1,col-1
-    // 6 -> row-1,col
-    // 7 -> row-1,col+1
+    //012 0 -> row+1,col-1 1 -> row+1,col 2 -> row+1,col+1
+    //3K4 3 -> row  ,col-1 X -> row  ,col 4 -> row  ,col+1
+    //567 5 -> row-1,col-1 6 -> row-1,col 7 -> row-1,col+1
     let (col, row) = position;
     let mut target: char;
 
@@ -349,6 +362,65 @@ fn rook_movement(
         }
     }
 }
+fn knight_movement(
+    position: (usize, usize),
+    board: &[[char; 8]; 8],
+    ally_pieces: &[char; 6],
+    enemy_pieces: &[char; 6],
+    possible_movements: &mut [[bool; 8]; 8],
+) {
+    let (col, row) = position;
+
+    if row < 6 {
+        if col > 0 {
+            if !ally_pieces.contains(&board[row + 2][col - 1]) {
+                possible_movements[row + 2][col - 1] = true;
+            }
+        }
+        if col < 7 {
+            if !ally_pieces.contains(&board[row + 2][col + 1]) {
+                possible_movements[row + 2][col + 1] = true;
+            }
+        }
+    }
+    if row > 1 {
+        if col > 0 {
+            if !ally_pieces.contains(&board[row - 2][col - 1]) {
+                possible_movements[row - 2][col - 1] = true;
+            }
+        }
+        if col < 7 {
+            if !ally_pieces.contains(&board[row - 2][col + 1]) {
+                possible_movements[row - 2][col + 1] = true;
+            }
+        }
+    }
+    if col < 6 {
+        if row > 0 {
+            if !ally_pieces.contains(&board[row - 1][col + 2]) {
+                possible_movements[row - 1][col + 2] = true;
+            }
+        }
+        if row < 7 {
+            if !ally_pieces.contains(&board[row + 1][col + 2]) {
+                possible_movements[row + 1][col + 2] = true;
+            }
+        }
+    }
+    if col > 1 {
+        if row > 0 {
+            if !ally_pieces.contains(&board[row - 1][col - 2]) {
+                possible_movements[row - 1][col - 2] = true;
+            }
+        }
+        if row < 7 {
+            if !ally_pieces.contains(&board[row + 1][col - 2]) {
+                possible_movements[row + 1][col - 2] = true;
+            }
+        }
+    }
+}
+
 fn print_posible_movements(board: [[bool; 8]; 8]) {
     // ANSI escape codes for background colors (48 = background, 38 = foreground)
 
