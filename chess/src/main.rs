@@ -11,14 +11,14 @@ const RESET: &str = "\x1B[0m";
 
 fn main() {
     let mut board: [[char; 8]; 8] = [
-        [' ', ' ', ' ', ' ', ' ', ' ', '♚', ' '], // a1-h1
+        [' ', ' ', ' ', '♚', ' ', ' ', '♚', ' '], // a1-h1
         [' ', '♝', ' ', ' ', ' ', '♟', ' ', ' '], // a2-h2
+        [' ', ' ', '♟', '♟', ' ', '♟', ' ', ' '],
+        ['♚', ' ', ' ', '♖', ' ', ' ', ' ', '♚'],
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', '♗', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', '♝', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', '♝', ' ', ' ', '♟', ' ', ' ', ' '],
         [' ', ' ', ' ', ' ', ' ', ' ', '♟', ' '], // a7-h7
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', '♚'], // a8-h8
+        [' ', ' ', ' ', ' ', '♚', ' ', ' ', '♚'], // a8-h8
     ];
     let mut white_posible_movements: [[bool; 8]; 8] = [[false; 8]; 8];
     let mut black_posible_movements: [[bool; 8]; 8] = [[false; 8]; 8];
@@ -28,7 +28,7 @@ fn main() {
     // let mut pinned_pieces: vec ((usize,usize),[[bool;8];8])
     // print_board_pieces(&board);
     print_chess_board(board);
-    bishop_movement(
+    rook_movement(
         (3, 3),
         &board,
         &WHITE_PIECES,
@@ -255,7 +255,7 @@ fn rook_movement(
             //Check for pins: if next piece is Black King
             for jter_col in iter_col + 1..=7 {
                 if board[row][jter_col] == enemy_pieces[0] {
-                    enemy_piece_pinned[row][col..jter_col].fill(true);
+                    enemy_piece_pinned[row][col..=iter_col].fill(true);
                 } else if board[row][jter_col] == ' ' {
                     continue;
                 } else {
@@ -277,7 +277,7 @@ fn rook_movement(
             //Check for pins: if next piece is Black King
             for jter_col in (0..iter_col).rev() {
                 if board[row][jter_col] == enemy_pieces[0] {
-                    enemy_piece_pinned[row][jter_col + 1..=col].fill(true);
+                    enemy_piece_pinned[row][iter_col..=col].fill(true);
                 } else if board[row][jter_col] == ' ' {
                     continue;
                 } else {
@@ -299,7 +299,7 @@ fn rook_movement(
             //Check for pins: if next piece is Black King
             for jter_row in iter_row + 1..=7 {
                 if board[jter_row][col] == enemy_pieces[0] {
-                    for r in row..jter_row {
+                    for r in row..=iter_row {
                         enemy_piece_pinned[r][col] = true;
                     }
                 } else if board[jter_row][col] == ' ' {
@@ -323,7 +323,7 @@ fn rook_movement(
             //Check for pins: if next piece is Black King
             for jter_row in (0..iter_row).rev() {
                 if board[jter_row][col] == enemy_pieces[0] {
-                    for r in jter_row + 1..=row {
+                    for r in iter_row..=row {
                         enemy_piece_pinned[r][col] = true;
                     }
                 } else if board[jter_row][col] == ' ' {
