@@ -11,12 +11,12 @@ const RESET: &str = "\x1B[0m";
 
 fn main() {
     let mut board: [[char; 8]; 8] = [
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', '♚'], // a1-h1
-        [' ', ' ', ' ', ' ', ' ', ' ', '♟', ' '], // a2-h2
+        [' ', ' ', ' ', ' ', ' ', ' ', '♚', ' '], // a1-h1
+        [' ', '♝', ' ', ' ', ' ', '♟', ' ', ' '], // a2-h2
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
         [' ', ' ', ' ', '♗', ' ', ' ', ' ', ' '],
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', '♝', ' ', ' ', ' ', ' ', ' ', ' '],
         [' ', ' ', ' ', ' ', ' ', ' ', '♟', ' '], // a7-h7
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', '♚'], // a8-h8
     ];
@@ -348,14 +348,10 @@ fn bishop_movement(
     let (col, row) = position;
     let right_col = 7 - col;
     let left_col = col;
-    let top_row = 7 - row;
+    let up_row = 7 - row;
     let down_row = row;
-    //maxcol maxrow
-    // maxcol minrow
-    // mincol minrow
-    // mincol maxrow
-    println!("{}", std::cmp::min(right_col, top_row));
-    for iter in 1..=std::cmp::min(right_col, top_row) {
+    let mut direction = std::cmp::min(right_col, up_row);
+    for iter in 1..=direction {
         let target = board[row + iter][col + iter];
         if target == ' ' {
             possible_movements[row + iter][col + iter] = true;
@@ -364,9 +360,9 @@ fn bishop_movement(
         } else {
             possible_movements[row + iter][col + iter] = true;
             //Check for pins: if next piece is Black King
-            for jter in std::cmp::min(right_col, top_row) + 1..=7 {
+            for jter in iter + 1..=direction {
                 if board[row + jter][col + jter] == enemy_pieces[0] {
-                    for i in 1..=7 - jter {
+                    for i in 0..jter {
                         enemy_piece_pinned[row + i][col + i] = true;
                     }
                 } else if board[row + jter][col + jter] == ' ' {
@@ -378,98 +374,83 @@ fn bishop_movement(
             break;
         }
     }
-    // for iter_col in col + 1..=7 {
-    //     let target = board[row][iter_col];
-    //     if target == ' ' {
-    //         possible_movements[row][iter_col] = true;
-    //     } else if ally_pieces.contains(&target) {
-    //         break;
-    //     } else {
-    //         possible_movements[row][iter_col] = true;
-    //         //Check for pins: if next piece is Black King
-    //         for jter_col in iter_col + 1..=7 {
-    //             if board[row][jter_col] == enemy_pieces[0] {
-    //                 enemy_piece_pinned[row][col..jter_col].fill(true);
-    //             } else if board[row][jter_col] == ' ' {
-    //                 continue;
-    //             } else {
-    //                 break;
-    //             }
-    //         }
-    //         break;
-    //     }
-    // }
 
-    // for iter_col in (0..col).rev() {
-    //     let target = board[row][iter_col];
-    //     if target == ' ' {
-    //         possible_movements[row][iter_col] = true;
-    //     } else if ally_pieces.contains(&target) {
-    //         break;
-    //     } else {
-    //         possible_movements[row][iter_col] = true;
-    //         //Check for pins: if next piece is Black King
-    //         for jter_col in (0..iter_col).rev() {
-    //             if board[row][jter_col] == enemy_pieces[0] {
-    //                 enemy_piece_pinned[row][jter_col + 1..=col].fill(true);
-    //             } else if board[row][jter_col] == ' ' {
-    //                 continue;
-    //             } else {
-    //                 break;
-    //             }
-    //         }
-    //         break;
-    //     }
-    // }
+    direction = std::cmp::min(right_col, down_row);
+    for iter in 1..=direction {
+        let target = board[row - iter][col + iter];
+        if target == ' ' {
+            possible_movements[row - iter][col + iter] = true;
+        } else if ally_pieces.contains(&target) {
+            break;
+        } else {
+            possible_movements[row - iter][col + iter] = true;
+            //Check for pins: if next piece is Black King
+            for jter in iter + 1..=direction {
+                if board[row - jter][col + jter] == enemy_pieces[0] {
+                    for i in 0..jter {
+                        enemy_piece_pinned[row - i][col + i] = true;
+                    }
+                } else if board[row - jter][col + jter] == ' ' {
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            break;
+        }
+    }
 
-    // for iter_row in row + 1..=7 {
-    //     let target = board[iter_row][col];
-    //     if target == ' ' {
-    //         possible_movements[iter_row][col] = true;
-    //     } else if ally_pieces.contains(&target) {
-    //         break;
-    //     } else {
-    //         possible_movements[iter_row][col] = true;
-    //         //Check for pins: if next piece is Black King
-    //         for jter_row in iter_row + 1..=7 {
-    //             if board[jter_row][col] == enemy_pieces[0] {
-    //                 for r in row..jter_row {
-    //                     enemy_piece_pinned[r][col] = true;
-    //                 }
-    //             } else if board[jter_row][col] == ' ' {
-    //                 continue;
-    //             } else {
-    //                 break;
-    //             }
-    //         }
-    //         break;
-    //     }
-    // }
+    direction = std::cmp::min(left_col, down_row);
+    for iter in 1..=direction {
+        let target = board[row - iter][col - iter];
+        if target == ' ' {
+            possible_movements[row - iter][col - iter] = true;
+        } else if ally_pieces.contains(&target) {
+            break;
+        } else {
+            possible_movements[row - iter][col - iter] = true;
+            //Check for pins: if next piece is Black King
+            for jter in iter + 1..=direction {
+                if board[row - jter][col - jter] == enemy_pieces[0] {
+                    for i in 0..jter {
+                        enemy_piece_pinned[row - i][col - i] = true;
+                    }
+                } else if board[row - jter][col - jter] == ' ' {
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            break;
+        }
+    }
 
-    // for iter_row in (0..row).rev() {
-    //     let target = board[iter_row][col];
-    //     if target == ' ' {
-    //         possible_movements[iter_row][col] = true;
-    //     } else if ally_pieces.contains(&target) {
-    //         break;
-    //     } else {
-    //         possible_movements[iter_row][col] = true;
-    //         //Check for pins: if next piece is Black King
-    //         for jter_row in (0..iter_row).rev() {
-    //             if board[jter_row][col] == enemy_pieces[0] {
-    //                 for r in jter_row + 1..=row {
-    //                     enemy_piece_pinned[r][col] = true;
-    //                 }
-    //             } else if board[jter_row][col] == ' ' {
-    //                 continue;
-    //             } else {
-    //                 break;
-    //             }
-    //         }
-    //         break;
-    //     }
-    // }
+    direction = std::cmp::min(left_col, up_row);
+    for iter in 1..=direction {
+        let target = board[row + iter][col - iter];
+        if target == ' ' {
+            possible_movements[row + iter][col - iter] = true;
+        } else if ally_pieces.contains(&target) {
+            break;
+        } else {
+            possible_movements[row + iter][col - iter] = true;
+            //Check for pins: if next piece is Black King
+            for jter in iter + 1..=direction {
+                if board[row + jter][col - jter] == enemy_pieces[0] {
+                    for i in 0..jter {
+                        enemy_piece_pinned[row + i][col - i] = true;
+                    }
+                } else if board[row + jter][col - jter] == ' ' {
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            break;
+        }
+    }
 }
+
 fn knight_movement(
     position: (usize, usize),
     board: &[[char; 8]; 8],
